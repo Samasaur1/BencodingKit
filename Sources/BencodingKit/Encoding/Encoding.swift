@@ -26,6 +26,8 @@ class Encoding {
             return encodeString(str)
         } else if let i = object as? Int {
             return encodeInt(i)
+        } else if let data = object as? Data {
+            return encodeData(data)
         }
         if object is Dictionary<AnyHashable, Any> {
             throw Error.illegallyKeyedDictionary(object: object as! [AnyHashable : Any], keyType: String(String(describing: type(of: object)).dropLast(6).dropFirst(11)))
@@ -77,5 +79,9 @@ class Encoding {
         data.append(char("e"))
 
         return data
+    }
+
+    private func encodeData(_ data: Data) -> Data {
+        return String(data.count).data(using: .ascii)! + char(":") + data
     }
 }

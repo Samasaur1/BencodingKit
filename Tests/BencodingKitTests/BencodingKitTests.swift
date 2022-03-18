@@ -31,6 +31,13 @@ final class BencodingKitTests: XCTestCase {
         let hash = Data(str.unicodeScalars.map { UInt8($0.value) })
         print(String(bytes: hash, encoding: .ascii))
         print(hash.hexStringEncoded())
+        let info = dict["info"] as! [String: Any]
+        var info2 = info
+        info2["pieces"] = hash
+        var dict2 = dict
+        dict2["info"] = info2
+        let data = try Bencoding.data(from: dict2)
+        try! data.write(to: .init(fileURLWithPath: "/Users/sam/hackscript2.torrent"))
     }
 }
 extension Data {
