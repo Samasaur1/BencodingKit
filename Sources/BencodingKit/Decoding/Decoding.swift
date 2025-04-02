@@ -108,7 +108,7 @@ class Decoding {
 
         index += len
         
-        return Data(data[index..<(index + len)])
+        return Data(data[(index - len)..<index])
     }
 
     private func decodeInt() throws -> Int {
