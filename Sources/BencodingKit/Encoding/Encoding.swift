@@ -67,7 +67,7 @@ class Encoding {
         let length = s.count
         data.append(String(length).data(using: .ascii)!)
         data.append(char(":"))
-        data.append(s.data(using: .ascii)!)
+        data.append(s.data(using: .utf8)!)
 
         return data
     }

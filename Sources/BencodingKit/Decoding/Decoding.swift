@@ -4,6 +4,7 @@ class Decoding {
     enum Error: Swift.Error {
         case illegallyKeyedDictionary
         case invalidData
+        case nonUTF8String
     }
     //MARK: - Private variables
     private let data: Data
@@ -32,7 +33,7 @@ class Decoding {
         case 101: //e => invalid data
             fatalError()
         case 105: //i => integer
-            return decodeInt()
+            return try decodeInt()
         case 108: //l => array
             return try decodeArray()
         case let x where x >= 48 && x <= 57: //digit => string
@@ -92,18 +93,24 @@ class Decoding {
 
         //TODO: no leading zeroes unless the length string is only "0"
 
-        let str = String(bytes: data[index..<(index + len)], encoding: .ascii)!
+        guard let str = String(bytes: data[index..<(index + len)], encoding: .utf8) else {
+            throw Error.nonUTF8String
+        }
         index += len
 
         return str
     }
 
-    private func decodeInt() -> Int {
+    private func decodeInt() throws -> Int {
         precondition(data[index] == 105)
         index += 1
 
-        let e = data[index...].firstIndex(of: 101)!
-        let str_num = String(bytes: data[index..<e], encoding: .ascii)!
+        guard let e = data[index...].firstIndex(of: 101) else {
+            throw Error.invalidData
+        }
+        guard let str_num = String(bytes: data[index..<e], encoding: .ascii) else {
+            throw Error.invalidData
+        }
 
 //        precondition(!str_num.contains { !"-0123456789".contains($0) }) //does not contain any non-digits
         //TODO: no leading zeroes unless the number is exactly "0"
