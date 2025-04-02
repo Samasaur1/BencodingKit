@@ -50,7 +50,10 @@ class Decoding {
         var d: [String: Any] = [:]
 
         while data[index] != 101 {
-            let key = try decodeDataOrString() as! String
+            let _key = try decodeDataOrString()
+            guard let key = _key as? String else {
+                throw Error.illegallyKeyedDictionary
+            }
             let value = try decodeAnything()
             d[key] = value
         }
@@ -122,7 +125,9 @@ class Decoding {
 //        precondition(!str_num.contains { !"-0123456789".contains($0) }) //does not contain any non-digits
         //TODO: no leading zeroes unless the number is exactly "0"
 
-        let num = Int(str_num)!
+        guard let num = Int(str_num) else {
+            throw Error.invalidData
+        }
 
         index = e + 1
 
