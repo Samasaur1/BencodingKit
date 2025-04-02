@@ -37,7 +37,7 @@ class Decoding {
         case 108: //l => array
             return try decodeArray()
         case let x where x >= 48 && x <= 57: //digit => string
-            return try decodeString()
+            return try decodeDataOrString()
         default: //invalid data
             throw Error.invalidData
         }
@@ -50,7 +50,7 @@ class Decoding {
         var d: [String: Any] = [:]
 
         while data[index] != 101 {
-            let key = try decodeString()
+            let key = try decodeDataOrString() as! String
             let value = try decodeAnything()
             d[key] = value
         }
@@ -74,7 +74,17 @@ class Decoding {
         return arr
     }
 
-    private func decodeString() throws -> String {
+    private func decodeDataOrString() throws -> Any {
+        let data = try decodeData()
+
+        if let s = String(bytes: data, encoding: .utf8) {
+            return s
+        } else {
+            return data
+        }
+    }
+
+    private func decodeData() throws -> Data {
         guard data[index] >= 48 && data[index] <= 57 else {
             throw Error.illegallyKeyedDictionary
         }
@@ -93,12 +103,9 @@ class Decoding {
 
         //TODO: no leading zeroes unless the length string is only "0"
 
-        guard let str = String(bytes: data[index..<(index + len)], encoding: .utf8) else {
-            throw Error.nonUTF8String
-        }
         index += len
-
-        return str
+        
+        return Data(data[index..<(index + len)])
     }
 
     private func decodeInt() throws -> Int {
